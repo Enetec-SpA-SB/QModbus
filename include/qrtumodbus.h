@@ -472,6 +472,7 @@ public:
     QByteArray calculateCheckSum( QByteArray &data ) const;
 
 private:
+    void _clearRxBuffer( void ) const;
 
 # /***/ ifdef Q_OS_WIN /***********************************************************************************************/
 

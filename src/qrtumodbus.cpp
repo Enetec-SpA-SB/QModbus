@@ -80,6 +80,15 @@ QRtuModbus::~QRtuModbus()
     close();
 }
 
+void QRtuModbus::_clearRxBuffer( void ) const
+{
+#ifdef Q_OS_UNIX
+    ::tcflush( _commPort.handle() , TCIFLUSH );
+#elif defined( Q_OS_WIN )
+    ::PurgeComm( _commPort , PURGE_RXCLEAR );
+#endif
+}
+
 bool QRtuModbus::open( const QString &device , const BaudRate baudRate , const StopBits stopBits , const Parity parity ,
                        const FlowControl flowControl , RtsDriveMode rtsDriveMode )
 {
@@ -419,8 +428,8 @@ QList<bool> QRtuModbus::readCoils( const quint8 deviceAddress , const quint16 st
     quint16 crc = _calculateCrc( pdu );
     pduStream.writeRawData( (const char *)&crc , sizeof( crc ) );
 
-    // Clear the RX buffer before making the request.
-    _readAll();
+    // Discard stale input without waiting for the response timeout.
+    _clearRxBuffer();
 
     // Send the pdu.
     _write( pdu );
@@ -513,8 +522,8 @@ QList<bool> QRtuModbus::readDiscreteInputs( const quint8 deviceAddress , const q
     quint16 crc = _calculateCrc( pdu );
     pduStream.writeRawData( (const char *)&crc , sizeof( crc ) );
 
-    // Clear the RX buffer before making the request.
-    _readAll();
+    // Discard stale input without waiting for the response timeout.
+    _clearRxBuffer();
 
     // Send the pdu.
     _write( pdu );
@@ -607,8 +616,8 @@ QList<quint16> QRtuModbus::readHoldingRegisters( const quint8 deviceAddress , co
     quint16 crc = _calculateCrc( pdu );
     pduStream.writeRawData( (const char *)&crc , sizeof( crc ) );
 
-    // Clear the RX buffer before making the request.
-    _readAll();
+    // Discard stale input without waiting for the response timeout.
+    _clearRxBuffer();
 
     // Send the pdu.
     _write( pdu );
@@ -700,8 +709,8 @@ QList<quint16> QRtuModbus::readInputRegisters( const quint8 deviceAddress , cons
     quint16 crc = _calculateCrc( pdu );
     pduStream.writeRawData( (const char *)&crc , sizeof( crc ) );
 
-    // Clear the RX buffer before making the request.
-    _readAll();
+    // Discard stale input without waiting for the response timeout.
+    _clearRxBuffer();
 
     // Send the pdu.
     _write( pdu );
@@ -793,8 +802,8 @@ bool QRtuModbus::writeSingleCoil( const quint8 deviceAddress , const quint16 out
     quint16 crc = _calculateCrc( pdu );
     pduStream.writeRawData( (const char *)&crc , sizeof( crc ) );
 
-    // Clear the RX buffer before making the request.
-    _readAll();
+    // Discard stale input without waiting for the response timeout.
+    _clearRxBuffer();
 
     // Send the pdu.
     _write( pdu );
@@ -878,8 +887,8 @@ bool QRtuModbus::writeSingleRegister( const quint8 deviceAddress , const quint16
     quint16 crc = _calculateCrc( pdu );
     pduStream.writeRawData( (const char *)&crc , sizeof( crc ) );
 
-    // Clear the RX buffer before making the request.
-    _readAll();
+    // Discard stale input without waiting for the response timeout.
+    _clearRxBuffer();
 
     // Send the pdu.
     _write( pdu );
@@ -978,8 +987,8 @@ bool QRtuModbus::writeMultipleCoils( const quint8 deviceAddress , const quint16 
     quint16 crc = _calculateCrc( pdu );
     pduStream.writeRawData( (const char *)&crc , sizeof( crc ) );
 
-    // Clear the RX buffer before making the request.
-    _readAll();
+    // Discard stale input without waiting for the response timeout.
+    _clearRxBuffer();
 
     // Send the pdu.
     _write( pdu );
@@ -1070,8 +1079,8 @@ bool QRtuModbus::writeMultipleRegisters( const quint8 deviceAddress , const quin
     quint16 crc = _calculateCrc( pdu );
     pduStream.writeRawData( (const char *)&crc , sizeof( crc ) );
 
-    // Clear the RX buffer before making the request.
-    _readAll();
+    // Discard stale input without waiting for the response timeout.
+    _clearRxBuffer();
 
     // Send the pdu.
     _write( pdu );
@@ -1155,8 +1164,8 @@ bool QRtuModbus::maskWriteRegister( const quint8 deviceAddress , const quint16 r
     quint16 crc = _calculateCrc( pdu );
     pduStream.writeRawData( (const char *)&crc , sizeof( crc ) );
 
-    // Clear the RX buffer before making the request.
-    _readAll();
+    // Discard stale input without waiting for the response timeout.
+    _clearRxBuffer();
 
     // Send the pdu.
     _write( pdu );
@@ -1251,8 +1260,8 @@ QList<quint16> QRtuModbus::writeReadMultipleRegisters( const quint8 deviceAddres
     quint16 crc = _calculateCrc( pdu );
     pduStream.writeRawData( (const char *)&crc , sizeof( crc ) );
 
-    // Clear the RX buffer before making the request.
-    _readAll();
+    // Discard stale input without waiting for the response timeout.
+    _clearRxBuffer();
 
     // Send the pdu.
     _write( pdu );
@@ -1344,8 +1353,8 @@ QList<quint16> QRtuModbus::readFifoQueue( const quint8 deviceAddress , const qui
     quint16 crc = _calculateCrc( pdu );
     pduStream.writeRawData( (const char *)&crc , sizeof( crc ) );
 
-    // Clear the RX buffer before making the request.
-    _readAll();
+    // Discard stale input without waiting for the response timeout.
+    _clearRxBuffer();
 
     // Send the pdu.
     _write( pdu );
@@ -1437,8 +1446,8 @@ QByteArray QRtuModbus::executeCustomFunction( const quint8 deviceAddress , const
     quint16 crc = _calculateCrc( pdu );
     pduStream.writeRawData( (const char *)&crc , sizeof( crc ) );
 
-    // Clear the RX buffer before making the request.
-    _readAll();
+    // Discard stale input without waiting for the response timeout.
+    _clearRxBuffer();
 
     // Send the pdu.
     _write( pdu );
@@ -1511,8 +1520,8 @@ QByteArray QRtuModbus::executeRaw( QByteArray &data , quint8 *const status ) con
         return QByteArray();
     }
 
-    // Clear the RX buffer before making the request.
-    _readAll();
+    // Discard stale input without waiting for the response timeout.
+    _clearRxBuffer();
 
     // Send the data.
     _write( data );
